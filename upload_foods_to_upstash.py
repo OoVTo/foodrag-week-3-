@@ -59,7 +59,9 @@ try:
     # Test connection by fetching info
     info = vector_index.info()
     print(f"✅ Connected to Upstash Vector")
-    print(f"   Vector count: {info.get('vector_count', 'N/A')}")
+    # InfoResult object has vector_count attribute directly
+    vector_count = info.vector_count if hasattr(info, 'vector_count') else 'N/A'
+    print(f"   Vector count: {vector_count}")
 except Exception as e:
     print(f"❌ Error connecting to Upstash: {e}")
     print("   Check your UPSTASH_VECTOR_REST_URL and UPSTASH_VECTOR_REST_TOKEN")
@@ -90,10 +92,10 @@ for item in food_data:
     if "allergens" in item and item["allergens"]:
         enriched_text += f" Common allergens: {', '.join(item['allergens'])}."
     
-    # Prepare vector for upsert
+    # Prepare vector for upsert (Upstash uses 'data' field, not 'text')
     vectors_to_upsert.append({
         "id": str(item_id),
-        "text": enriched_text,
+        "data": enriched_text,  # Use 'data' instead of 'text' for auto-embedding
         "metadata": {
             "original_text": item.get("text", ""),
             "region": item.get("region", "Unknown"),
