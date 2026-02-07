@@ -5,14 +5,14 @@ Here’s a clear, beginner-friendly `README.md` for your RAG project, designed t
 ## 📄 `README.md`
 
 ````markdown
-# 🧠 RAG-Food: Simple Retrieval-Augmented Generation with ChromaDB + Ollama
+# 🧠 RAG-Food: Cloud-Powered Retrieval-Augmented Generation
 
-This is a **minimal working RAG (Retrieval-Augmented Generation)** demo using:
+This is a **cloud-native RAG (Retrieval-Augmented Generation)** demo using:
 
-- ✅ Local LLM via [Ollama](https://ollama.com/)
-- ✅ Local embeddings via `mxbai-embed-large`
-- ✅ [ChromaDB](https://www.trychroma.com/) as the vector database
-- ✅ A simple food dataset in JSON (Indian foods, fruits, etc.)
+- ☁️ **[Upstash Vector](https://upstash.com/)** - Serverless vector database with automatic embeddings
+- ⚡ **[Groq API](https://groq.com/)** - High-speed LLM inference (Mixtral 8x7B)
+- ✅ A comprehensive food dataset in JSON (90 global cuisine items)
+- 🚀 No local ML setup required - fully cloud-powered
 
 ---
 
@@ -23,15 +23,16 @@ This app allows you to ask questions like:
 - “Which Indian dish uses chickpeas?”
 - “What dessert is made from milk and soaked in syrup?”
 - “What is masala dosa made of?”
+- "Tell me about healthy foods high in omega-3s"
 
-It **does not rely on the LLM’s built-in memory**. Instead, it:
+It **leverages cloud APIs for vector search and LLM inference**:
 
-1. **Embeds your custom text data** (about food) using `mxbai-embed-large`
-2. Stores those embeddings in **ChromaDB**
+1. **Automatic embeddings** - Upstash Vector handles embedding automatically
+2. Stores embeddings in **Upstash Vector** (serverless)
 3. For any question, it:
-   - Embeds your question
-   - Finds relevant context via similarity search
-   - Passes that context + question to a local LLM (`llama3.2`)
+   - Queries Upstash Vector for relevant context
+   - Finds the top 3 most similar food items
+   - Passes context + question to **Groq API** (fast LLM)
 4. Returns a natural-language answer grounded in your data.
 
 ---
@@ -41,23 +42,18 @@ It **does not rely on the LLM’s built-in memory**. Instead, it:
 ### ✅ Software
 
 - Python 3.8+
-- Ollama installed and running locally
-- ChromaDB installed
+- pip (Python package manager)
 
-### ✅ Ollama Models Needed
+### ✅ API Keys Required
 
-Run these in your terminal to install them:
+You'll need credentials for:
 
-```bash
-ollama pull llama3.2
-ollama pull mxbai-embed-large
-````
+1. **Upstash Vector** - Get from [upstash.com](https://upstash.com/)
+   - `UPSTASH_VECTOR_REST_URL`
+   - `UPSTASH_VECTOR_REST_TOKEN`
 
-> Make sure `ollama` is running in the background. You can test it with:
->
-> ```bash
-> ollama run llama3.2
-> ```
+2. **Groq API** - Get from [groq.com](https://groq.com/)
+   - `GROQ_API_KEY`
 
 ---
 
@@ -66,53 +62,80 @@ ollama pull mxbai-embed-large
 ### 1. Clone or download this repo
 
 ```bash
-git clone https://github.com/yourname/rag-food
-cd rag-food
+git clone https://github.com/OoVTo/foodrag
+cd foodrag
 ```
 
-### 2. Install Python dependencies
+### 2. Create a `.env` file with your API keys
+
+Create a file named `.env` in the project root:
 
 ```bash
-pip install chromadb requests
+# .env file
+UPSTASH_VECTOR_REST_URL=https://your-upstash-url.upstash.io
+UPSTASH_VECTOR_REST_TOKEN=your_upstash_token
+GROQ_API_KEY=your_groq_api_key
+LLM_MODEL=mixtral-8x7b-32768
 ```
 
-### 3. Run the RAG app
+### 3. Install Python dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+Or manually:
+
+```bash
+pip install upstash-vector groq python-dotenv
+```
+
+### 4. Run the RAG app
 
 ```bash
 python rag_run.py
 ```
 
-If it's the first time, it will:
-
-* Create `foods.json` if missing
-* Generate embeddings for all food items
-* Load them into ChromaDB
-* Run a few example questions
+**First run:**
+- ✅ Connects to Upstash Vector Database
+- ✅ Connects to Groq API
+- ✅ Upserts food items to vector database (automatic embedding)
+- ✅ Launches interactive GUI
 
 ---
 
 ## 📁 File Structure
 
 ```
-rag-food/
-├── rag_run.py       # Main app script
-├── foods.json       # Food knowledge base (created if missing)
-├── README.md        # This file
-```
+foodrag/
+├── rag_run.py            # Main app script (cloud-powered)
+├── foods.json            # Food knowledge base (90 items)
+├── .env                  # API credentials (keep secret!)
+├── requirements.txt      # Python dependencies
+└── README.md             # This file
+```## 🧠 How It Works (Step-by-Step)
 
----
+### Architecture: Cloud-Native RAG
 
-## 🧠 How It Works (Step-by-Step)
+1. **Data Loading** - Food items loaded from `foods.json`
+2. **Vector Indexing** - Upstash Vector automatically embeds and indexes each food item
+3. **Serverless Storage** - Embeddings stored in Upstash Vector (no local DB needed)
+4. **Query Processing**:
+   - User question sent to Upstash Vector
+   - Vector database performs semantic similarity search
+   - Top 3 most relevant food items retrieved
+5. **LLM Generation**:
+   - Retrieved context + user question sent to Groq API
+   - Groq's Mixtral model generates answer
+   - Response returned with source attribution
 
-1. **Data** is loaded from `foods.json`
-2. Each entry is embedded using Ollama's `mxbai-embed-large`
-3. Embeddings are stored in ChromaDB
-4. When you ask a question:
+### Key Benefits
 
-   * The question is embedded
-   * The top 1–2 most relevant chunks are retrieved
-   * The context + question is passed to `llama3.2`
-   * The model answers using that info only
+- ⚡ **No Local Setup** - No Ollama, no ChromaDB directory
+- 🚀 **Fast Inference** - Groq API provides sub-100ms LLM responses
+- 📊 **Automatic Embeddings** - Upstash handles all embedding complexity
+- 🔄 **Retry Logic** - Built-in exponential backoff for cloud reliability
+- 💾 **Serverless** - Pay only for what you use
 
 ---
 
@@ -129,11 +152,15 @@ print(rag_query("Which foods are spicy and vegetarian?"))
 
 ## � Recent Updates (by Gab)
 
-- ✨ **Extended food database** - Added 90 diverse food items from global cuisines
-- 🌏 **Japanese & Middle Eastern cuisine** - Comprehensive coverage of Japanese (Sushi, Ramen, Tempura) and Middle Eastern (Hummus, Falafel, Shawarma, Baklava) dishes
-- 🏷️ **Region tagging** - Each food item now includes region and type metadata for better context retrieval
-- 🧠 **Reasoning context** - Enhanced embeddings with enriched text including region and food type information for improved similarity matching
-- 📊 **Structured data** - Better organization of food data with categories (Main Course, Dessert, Snack, Appetizer, etc.)
+- ✨ **Technical Migration** - Migrated from local (ChromaDB + Ollama) to cloud (Upstash + Groq)
+- ☁️ **Cloud-Native Architecture** - Serverless vector database and LLM inference
+- ⚡ **Performance Improvements** - Sub-100ms Groq API responses
+- 🤝 **Retry & Error Handling** - Exponential backoff for network resilience
+- 📦 **Extended food database** - 90 diverse food items from global cuisines
+- 🌏 **Japanese & Middle Eastern cuisine** - Comprehensive global coverage
+- 🏷️ **Region tagging** - Each food item includes region and type metadata
+- 🧠 **Reasoning context** - Enhanced embeddings for improved similarity matching
+- 📊 **Structured data** - Better organization with food type categories
 
 ---
 

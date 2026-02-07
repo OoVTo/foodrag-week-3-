@@ -1,0 +1,5 @@
+chromadb==0.4.24
+requests==2.31.0
+upstash-vector==0.4.2
+groq==0.7.0
+python-dotenv==1.0.0
